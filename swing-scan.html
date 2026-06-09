@@ -92,14 +92,23 @@ const VOLL    = [...DAX,...MDAX,...NDX,...SP5];
 // ── INDIKATOREN ──────────────────────────────────────────────────────────────
 async function fetchYahoo(ticker) {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?range=1y&interval=1d`;
-  const proxy = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`;
-  const res = await fetch(proxy);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  const r = data?.chart?.result?.[0];
-  if (!r) throw new Error("Keine Daten");
-  const q = r.indicators.quote[0];
-  return { closes:q.close, volumes:q.volume, highs:q.high, lows:q.low };
+  const proxies = [
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  ];
+  for(const proxy of proxies) {
+    try {
+      const res = await fetch(proxy);
+      if(!res.ok) continue;
+      const data = await res.json();
+      const r = data?.chart?.result?.[0];
+      if(!r) continue;
+      const q = r.indicators.quote[0];
+      return { closes:q.close, volumes:q.volume, highs:q.high, lows:q.low };
+    } catch(e) { continue; }
+  }
+  throw new Error("Alle Proxies fehlgeschlagen");
 }
 
 const cl = arr => arr.map(v=>(v==null||isNaN(v))?null:v);
