@@ -230,7 +230,7 @@ const S = {
   label:{fontSize:"9px",color:C.muted,textTransform:"uppercase",letterSpacing:"0.1em",fontFamily:C.mono,marginBottom:"3px"},
   prog:{background:C.border,borderRadius:"4px",height:"3px",marginBottom:"6px",overflow:"hidden"},
   bar:p=>({width:`${p}%`,height:"100%",background:`linear-gradient(90deg,${C.accentDim},${C.accent})`,transition:"width 0.3s",borderRadius:"4px"}),
-  secTitle:{fontSize:"10px",color:C.muted,textTransform:"uppercase",letterSpacing:"0.12em",fontFamily:C.mono,marginBottom:"10px",borderBottom:`1px solid ${C.border}`,paddingBottom:"6px"},
+  secTitle:{fontSize:"12px",color:C.muted,textTransform:"uppercase",letterSpacing:"0.08em",fontFamily:C.mono,marginBottom:"10px",borderBottom:`1px solid ${C.border}`,paddingBottom:"6px"},
 };
 
 // ── KANDIDATEN-KARTE ─────────────────────────────────────────────────────────
@@ -279,7 +279,7 @@ function Card({c}) {
         </div>
       ))}
 
-      <div style={{background:C.surface,borderRadius:"6px",padding:"10px",margin:"10px 0",display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px"}}>
+      <div style={{background:C.surface,borderRadius:"6px",padding:"12px",margin:"10px 0",display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"10px"}}>
         {[
           ["Einstieg", `${c.last} €`,  null],
           ["Stop-Loss",`${c.stop} €`,  "red"],
@@ -292,30 +292,15 @@ function Card({c}) {
           ["Volumen",  `${c.volR}x`,   parseFloat(c.volR)>1.2?"green":null],
         ].map(([l,v,col])=>(
           <div key={l}>
-            <div style={{fontSize:"8px",color:C.muted,fontFamily:C.mono,marginBottom:"2px"}}>{l.toUpperCase()}</div>
-            <div style={{fontFamily:C.mono,fontWeight:"600",fontSize:"12px",color:col==="green"?C.accent:col==="red"?C.red:C.text}}>{v}</div>
+            <div style={{fontSize:"10px",color:C.muted,fontFamily:C.mono,marginBottom:"3px"}}>{l.toUpperCase()}</div>
+            <div style={{fontFamily:C.mono,fontWeight:"700",fontSize:"14px",color:col==="green"?C.accent:col==="red"?C.red:C.text}}>{v}</div>
           </div>
         ))}
       </div>
 
       {parseFloat(c.risk)>50&&(
-        <div style={{background:"#251200",border:`1px solid ${C.yellow}33`,borderRadius:"6px",padding:"8px",marginBottom:"10px",fontSize:"11px",color:C.yellow}}>
+        <div style={{background:"#251200",border:`1px solid ${C.yellow}33`,borderRadius:"6px",padding:"10px",marginBottom:"10px",fontSize:"12px",color:C.yellow}}>
           ⚠ Risiko &gt; 50 € – Position verkleinern oder überspringen.
-        </div>
-      )}
-
-      {!news&&<button style={S.btn("secondary",loading)} onClick={doNews} disabled={loading}>{loading?"⟳ KI prüft Nachrichten...":"🔍 KI News-Check"}</button>}
-
-      {news&&(
-        <div style={{background:C.surface,border:`1px solid ${ec==="green"?C.accent:ec==="red"?C.red:C.yellow}33`,borderRadius:"6px",padding:"10px"}}>
-          <div style={{display:"flex",justifyContent:"space-between",marginBottom:"6px"}}>
-            <span style={{fontSize:"10px",color:C.muted,fontFamily:C.mono}}>KI-BEWERTUNG</span>
-            <span style={S.chip(ec)}>{news.empfehlung}</span>
-          </div>
-          <div style={{fontSize:"12px",marginBottom:"4px"}}>{news.hauptgrund}</div>
-          {news.ausschlussgrund&&<div style={{fontSize:"11px",color:C.red}}>⛔ {news.ausschlussgrund}</div>}
-          {news.katalysator&&<div style={{fontSize:"11px",color:C.accent}}>🚀 {news.katalysator}</div>}
-          {news.quartalszahlen&&<div style={{fontSize:"11px",color:C.yellow}}>📅 Quartalszahlen &lt;20 Tage!</div>}
         </div>
       )}
       <div style={{fontSize:"10px",color:C.muted,marginTop:"8px",fontStyle:"italic"}}>⚠ Kein automatischer Stop-Loss. Täglich manuell überwachen.</div>
@@ -392,10 +377,10 @@ function ScannerTab({settings}) {
                       <div style={{fontFamily:C.mono, fontWeight:"700", fontSize:"13px", color: m.ueberMA50 ? C.accent : C.red}}>
                         {m.ueberMA50 ? "✓ ÜBER MA50" : "✗ UNTER MA50"}
                       </div>
-                      <div style={{fontSize:"10px", color:C.muted, marginTop:"2px"}}>
+                      <div style={{fontSize:"13px", color:C.muted, marginTop:"2px"}}>
                         Kurs: {m.last} · MA50: {m.ma50}
                       </div>
-                      <div style={{fontSize:"10px", color: parseFloat(m.abstand) >= 0 ? C.accent : C.red}}>
+                      <div style={{fontSize:"13px", color: parseFloat(m.abstand) >= 0 ? C.accent : C.red}}>
                         {parseFloat(m.abstand) >= 0 ? "+" : ""}{m.abstand}% zum MA50
                       </div>
                     </>
@@ -515,8 +500,6 @@ function CheckerTab({settings}) {
   const [result,setResult]=useState(null);
   const [error,setError]=useState(null);
   const [loading,setLoading]=useState(false);
-  const [newsResult,setNewsResult]=useState(null);
-  const [newsLoading,setNewsLoading]=useState(false);
 
   async function doCheck(){
     if(!ticker.trim()) return;
@@ -567,22 +550,6 @@ function CheckerTab({settings}) {
         </div>
       )}
       {result&&<Card c={result}/>}
-      {(result||error?.last)&&!newsResult&&(
-        <button style={S.btn("secondary",newsLoading)} onClick={doNews} disabled={newsLoading}>
-          {newsLoading?"⟳ KI-News-Check...":"🔍 KI News-Check"}
-        </button>
-      )}
-      {newsResult&&(
-        <div style={S.card}>
-          <div style={S.secTitle}>KI News-Analyse</div>
-          <div style={{display:"flex",justifyContent:"space-between",marginBottom:"8px"}}>
-            <span style={{fontSize:"12px"}}>{newsResult.hauptgrund}</span>
-            <span style={S.chip(newsResult.empfehlung==="KAUFEN"?"green":newsResult.empfehlung==="AUSSCHLIESSEN"?"red":"yellow")}>{newsResult.empfehlung}</span>
-          </div>
-          {newsResult.ausschlussgrund&&<div style={{fontSize:"11px",color:C.red}}>⛔ {newsResult.ausschlussgrund}</div>}
-          {newsResult.katalysator&&<div style={{fontSize:"11px",color:C.accent}}>🚀 {newsResult.katalysator}</div>}
-        </div>
-      )}
     </div>
   );
 }
